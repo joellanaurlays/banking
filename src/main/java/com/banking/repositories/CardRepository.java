@@ -16,5 +16,5 @@ import java.util.List;
 @Repository
 public interface CardRepository extends JpaRepository<Card, String> {
     List<Card> findByAccountId(String accountId);
+    List<Card> findByBlocked(boolean blocked);
 }
-

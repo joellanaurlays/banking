@@ -4,7 +4,6 @@
  */
 package com.banking.dtos;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -12,15 +11,9 @@ import lombok.Data;
  * @author joella
  */
 @Data
-@AllArgsConstructor
-public class JwtResponse {
-    private String token;
-    private String type = "Bearer";
-    private String id;
-    private String email;
+public class UserUpdateDTO {
     private String firstName;
     private String lastName;
-    private String role;
     private String phone;
     private String address;
 }

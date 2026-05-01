@@ -17,7 +17,6 @@ public class UserDTO {
 
     private String id;
 
-    @NotBlank(message = "Veuillez remplir le champ email !")
     @Email(message = "Format d'email invalide")
     private String email;
 

@@ -28,22 +28,27 @@ public class UserDetailsImpl implements UserDetails {
     private String firstName;
     private String lastName;
     private String role;
+    private String phone;
+    private String address;
     private Collection<? extends GrantedAuthority> authorities;
     
     public UserDetailsImpl(String id, String email, String password, String firstName, 
-                           String lastName, String role, Collection<? extends GrantedAuthority> authorities) {
+                           String lastName, String role, String phone, String address, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
+        this.phone = phone;
+        this.address = address;
         this.authorities = authorities;
     }
     
     public static UserDetailsImpl build(User user) {
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
         
+        System.out.println(user.getPhone() + " tttttttttttttttttttttttttttttttttttttttttttt");
         return new UserDetailsImpl(
                 user.getId(),
                 user.getEmail(),
@@ -51,6 +56,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getRole().name(),
+                user.getPhone(),
+                user.getAddress(),
                 Collections.singletonList(authority));
     }
     
@@ -77,6 +84,14 @@ public class UserDetailsImpl implements UserDetails {
     
     public String getRole() {
         return role;
+    }
+    
+    public String getPhone() {
+        return phone;
+    }
+    
+    public String getAddress() {
+        return address;
     }
     
     @Override

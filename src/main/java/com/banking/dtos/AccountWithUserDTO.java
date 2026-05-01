@@ -4,6 +4,7 @@
  */
 package com.banking.dtos;
 
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,15 +14,14 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class JwtResponse {
-    private String token;
-    private String type = "Bearer";
+public class AccountWithUserDTO {
     private String id;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String role;
-    private String phone;
-    private String address;
+    private String accountNumber;
+    private BigDecimal balance;
+    private String currency;
+    private String userId;
+    private String userEmail;
+    private String userFirstName;
+    private String userLastName;
 }
 

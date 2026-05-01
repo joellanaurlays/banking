@@ -16,6 +16,7 @@ import com.banking.repositories.AccountRepository;
 import com.banking.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.hibernate.Hibernate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -86,6 +87,24 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
     
+    @Transactional
+    public Account getAccountByIdWithUser(String id) {
+        return accountRepository.findById(id)
+                .map(account -> {
+                    // Forcer le chargement des relations LAZY
+                    Hibernate.initialize(account.getUser());
+                    Hibernate.initialize(account.getTransactions());
+                    return account;
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
+    }
+
+    @Transactional(readOnly = true)
+    public Account getAccountByIdEntity(String id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
+    }
+    
     // Récupérer un compte par son numéro
     public Account getAccountByNumber(String accountNumber) {
         return accountRepository.findByAccountNumber(accountNumber)
@@ -99,13 +118,44 @@ public class AccountService {
         return accountMapper.toDTO(account);
     }
     
+    // Récupérer un compte avec son utilisateur (FETCH JOIN)
+    @Transactional(readOnly = true)
+    public Account getAccountByIdEntityWithUser(String id) {
+        return accountRepository.findByIdWithUser(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé avec l'ID: " + id));
+    }
+
+    // Récupérer un compte par numéro avec son utilisateur
+    @Transactional(readOnly = true)
+    public Account getAccountByNumberWithUser(String accountNumber) {
+        return accountRepository.findByAccountNumberWithUser(accountNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé avec le numéro: " + accountNumber));
+    }
+
+    // Récupérer les comptes d'un utilisateur avec leurs relations
+    @Transactional(readOnly = true)
+    public List<Account> getAccountsByUserIdWithUser(String userId) {
+        return accountRepository.findByUserIdWithUser(userId);
+    }
+    
+     // Récupérer un compte avec chargement forcé des relations LAZY
+    @Transactional(readOnly = true)
+    public Account getAccountByIdWithLazyLoaded(String id) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
+        // Forcer le chargement des relations LAZY
+        Hibernate.initialize(account.getUser());
+        Hibernate.initialize(account.getTransactions());
+        return account;
+    }
+
     // Vérifier si un compte a assez de solde
     public void checkSufficientBalance(Account account, BigDecimal amount) {
         if (account instanceof CurrentAccount) {
             CurrentAccount currentAccount = (CurrentAccount) account;
             BigDecimal availableBalance = account.getBalance().add(currentAccount.getOverdraftLimit());
             if (availableBalance.compareTo(amount) < 0) {
-                throw new RuntimeException("Solde insuffisant. Solde: " + account.getBalance() + 
+                throw new RuntimeException("Solde insuffisant. Solde: " + account.getBalance() +
                         ", Découvert autorisé: " + currentAccount.getOverdraftLimit());
             }
         } else {
@@ -115,34 +165,30 @@ public class AccountService {
         }
     }
     
-    // Mettre à jour le solde
+      // Mettre à jour le solde
+    @Transactional
     public void updateBalance(Account account, BigDecimal newBalance) {
         account.setBalance(newBalance);
         account.setLastActivityAt(LocalDateTime.now());
         accountRepository.save(account);
     }
-    
+
     // Suspendre un compte
+    @Transactional
     public void suspendAccount(String id) {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
         account.setActive(false);
         accountRepository.save(account);
     }
-    
+
     // Activer un compte
+    @Transactional
     public void activateAccount(String id) {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Compte non trouvé"));
         account.setActive(true);
         accountRepository.save(account);
-    }
-    
-    public Account getAccountByIdEntity(String id) {
-    return accountRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException(
-                String.format("Compte non trouvé avec l'ID: %s", id)
-            ));
     }
 }
     

@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 /**
  * Service de gestion des transactions bancaires
@@ -53,7 +54,7 @@ public class TransactionService {
     // Effectuer un dépôt
     @Transactional
     public TransactionDTO deposit(String accountNumber, DepositRequest request) {
-        Account account = accountService.getAccountByNumber(accountNumber);
+        Account account = accountService.getAccountByNumberWithUser(accountNumber);
         
         BigDecimal newBalance = account.getBalance().add(request.getAmount());
         
@@ -97,7 +98,7 @@ public class TransactionService {
     // Effectuer un retrait
     @Transactional
     public TransactionDTO withdraw(String accountNumber, WithdrawRequest request) {
-        Account account = accountService.getAccountByNumber(accountNumber);
+        Account account = accountService.getAccountByNumberWithUser(accountNumber);
         
         // Vérifier le solde
         accountService.checkSufficientBalance(account, request.getAmount());
@@ -144,9 +145,9 @@ public class TransactionService {
     // Effectuer un virement
     @Transactional
     public TransactionDTO transfer(TransferRequest request) {
-        Account sourceAccount = accountService.getAccountByNumber(request.getSourceAccountNumber());
-        Account targetAccount = accountService.getAccountByNumber(request.getTargetAccountNumber());
-        
+        Account sourceAccount = accountService.getAccountByNumberWithUser(request.getSourceAccountNumber());
+        Account targetAccount = accountService.getAccountByNumberWithUser(request.getTargetAccountNumber());
+    
         // Vérifier qu'on ne vire pas vers le même compte
         if (request.getSourceAccountNumber().equals(request.getTargetAccountNumber())) {
             loggingService.logError("TRANSFER", sourceAccount.getUser().getId(), "Tentative de virement vers le même compte");

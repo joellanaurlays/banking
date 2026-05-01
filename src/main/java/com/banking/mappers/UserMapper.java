@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
     
-    public UserDTO toDTO(User user) {
+    public static UserDTO toDTO(User user) {
         if (user == null) return null;
         
         UserDTO dto = new UserDTO();
@@ -38,7 +38,7 @@ public class UserMapper {
         return dto;
     }
     
-    public User toEntity(UserDTO dto) {
+    public static User toEntity(UserDTO dto) {
         if (dto == null) return null;
         
         User user = new User();

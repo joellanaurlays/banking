@@ -45,7 +45,7 @@ public class AuthController {
     PasswordEncoder encoder;
     
     @Autowired
-    JwtUtils jwtUtils;
+    JwtUtils jwtUtils; 
     
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -57,13 +57,18 @@ public class AuthController {
         
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         
-        return ResponseEntity.ok(new JwtResponse(jwt,
+        return ResponseEntity.ok(new JwtResponse(
+                jwt,
                 "Bearer",
                 userDetails.getId(),
                 userDetails.getEmail(),
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
-                userDetails.getRole()));
+                userDetails.getRole(),
+                userDetails.getPhone(),
+                userDetails.getAddress()
+        ));
+                
     }
     
     @PostMapping("/signup")
@@ -78,8 +83,8 @@ public class AuthController {
         user.setPassword(encoder.encode(signupRequest.getPassword()));
         user.setFirstName(signupRequest.getFirstName());
         user.setLastName(signupRequest.getLastName());
-        user.setPhone(signupRequest.getPhone());
-        user.setAddress(signupRequest.getAddress());
+        user.setPhone(signupRequest.getPhone());  
+        user.setAddress(signupRequest.getAddress()); 
         user.setRole(Role.USER);
         
         userRepository.save(user);

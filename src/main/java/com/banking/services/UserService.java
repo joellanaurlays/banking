@@ -5,6 +5,7 @@
 package com.banking.services;
 
 import com.banking.dtos.UserDTO;
+import com.banking.dtos.UserUpdateDTO;
 import com.banking.entities.Role;
 import com.banking.entities.User;
 import com.banking.exceptions.ResourceNotFoundException;
@@ -28,6 +29,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
+    public User getUserEntityById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
     
     // Créer un utilisateur
     public UserDTO createUser(UserDTO userDTO) {
@@ -100,6 +106,21 @@ public class UserService {
         dto.setActive(user.isActive());
         return dto;
     }
+    
+    @Transactional
+    public UserDTO updateUser(String id, UserUpdateDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+        if (dto.getPhone() != null) user.setPhone(dto.getPhone());
+        if (dto.getAddress() != null) user.setAddress(dto.getAddress());
+
+        userRepository.save(user);
+        return convertToDTO(user);
+    }
 }
+
 
    
